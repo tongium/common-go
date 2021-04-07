@@ -1,6 +1,7 @@
 package tracing
 
 import (
+	"context"
 	"io"
 	"net/http"
 
@@ -25,10 +26,14 @@ func GetJeagerTracer(serviceName string) (opentracing.Tracer, io.Closer, error) 
 	return cfg.NewTracer()
 }
 
-func GetSpanByRequest(functionName string, r *http.Request) opentracing.Span {
+func GetSpanByRequest(functionName string, r *http.Request) (opentracing.Span, context.Context) {
 	tracer := opentracing.GlobalTracer()
 	spanCtx, _ := tracer.Extract(opentracing.HTTPHeaders, opentracing.HTTPHeadersCarrier(r.Header))
-	return tracer.StartSpan(functionName, ext.RPCServerOption(spanCtx))
+
+	span := tracer.StartSpan(functionName, ext.RPCServerOption(spanCtx))
+	ctx := opentracing.ContextWithSpan(r.Context(), span)
+
+	return span, ctx
 }
 
 func SetSpanRequest(span opentracing.Span, req *http.Request) error {
