@@ -26,13 +26,11 @@ func GetJeagerTracer(serviceName string) (opentracing.Tracer, io.Closer, error) 
 	return cfg.NewTracer()
 }
 
-func GetSpanByRequest(functionName string, r *http.Request) (opentracing.Span, context.Context) {
+func GetSpanByRequest(operationName string, r *http.Request) (opentracing.Span, context.Context) {
 	tracer := opentracing.GlobalTracer()
 	spanCtx, _ := tracer.Extract(opentracing.HTTPHeaders, opentracing.HTTPHeadersCarrier(r.Header))
-
-	span := tracer.StartSpan(functionName, ext.RPCServerOption(spanCtx))
+	span := tracer.StartSpan(operationName, ext.RPCServerOption(spanCtx))
 	ctx := opentracing.ContextWithSpan(r.Context(), span)
-
 	return span, ctx
 }
 
