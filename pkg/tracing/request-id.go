@@ -21,7 +21,7 @@ func ContextWithRequestID(c echo.Context) context.Context {
 }
 
 func GetRequestIDFromContext(ctx context.Context) string {
-	if ctx != nil && ctx.Value("request_id") != nil {
+	if ctx != nil && ctx.Value(constant.RequestIDContextKey) != nil {
 		return fmt.Sprintf("%v", ctx.Value(constant.RequestIDContextKey))
 	}
 
