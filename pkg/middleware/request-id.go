@@ -8,8 +8,6 @@ import (
 	"github.com/tongium/common-go/pkg/constant"
 )
 
-const defaultHeaderKey string = "X-Request-ID"
-
 func randomString(size int) string {
 	var letters = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789")
 
@@ -27,7 +25,7 @@ func generator() string {
 
 func RequestIDMiddleware(headerKey string) func(next http.Handler) http.Handler {
 	if headerKey == "" {
-		headerKey = defaultHeaderKey
+		headerKey = constant.DefaultRequstIDHeaderKey
 	}
 
 	return func(next http.Handler) http.Handler {

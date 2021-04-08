@@ -3,8 +3,10 @@ package tracing
 import (
 	"context"
 	"fmt"
+	"net/http"
 
 	"github.com/labstack/echo"
+	"github.com/opentracing/opentracing-go"
 	"github.com/tongium/common-go/pkg/constant"
 )
 
@@ -24,4 +26,19 @@ func GetRequestIDFromContext(ctx context.Context) string {
 	}
 
 	return ""
+}
+
+func SetRequestHeader(ctx context.Context, req *http.Request, span opentracing.Span, headerKey string) {
+	key := headerKey
+	if key == "" {
+		key = constant.DefaultRequstIDHeaderKey
+	}
+
+	if ctx != nil {
+		req.Header.Set(key, GetRequestIDFromContext(ctx))
+	}
+
+	if span != nil {
+		SetSpanRequest(span, req)
+	}
 }
