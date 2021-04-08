@@ -36,7 +36,7 @@ func GetSpanByRequest(operationName string, r *http.Request) (opentracing.Span, 
 
 	rid := r.Header.Get(constant.DefaultRequstIDHeaderKey)
 	if rid != "" {
-		span.SetBaggageItem("request-id", rid)
+		span.SetTag("http.request_id", rid)
 	}
 
 	return span, ctx
@@ -51,7 +51,7 @@ func GetContextAndSpanByEchoContext(c echo.Context, operationName string) (opent
 	}
 
 	if rid != "" {
-		span.SetBaggageItem("request-id", rid)
+		span.SetTag("http.request_id", rid)
 	}
 
 	return span, context.WithValue(ctx, constant.RequestIDContextKey, rid)
