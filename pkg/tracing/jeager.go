@@ -5,8 +5,10 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/labstack/echo"
 	"github.com/opentracing/opentracing-go"
 	"github.com/opentracing/opentracing-go/ext"
+	"github.com/tongium/common-go/pkg/constant"
 	"github.com/uber/jaeger-client-go"
 	"github.com/uber/jaeger-client-go/config"
 )
@@ -32,6 +34,17 @@ func GetSpanByRequest(operationName string, r *http.Request) (opentracing.Span, 
 	span := tracer.StartSpan(operationName, ext.RPCServerOption(spanCtx))
 	ctx := opentracing.ContextWithSpan(r.Context(), span)
 	return span, ctx
+}
+
+func GetContextAndSpanByEchoContext(c echo.Context, operationName string) (opentracing.Span, context.Context) {
+	span, ctx := GetSpanByRequest(operationName, c.Request())
+
+	rid := c.Request().Header.Get(echo.HeaderXRequestID)
+	if rid == "" {
+		rid = c.Response().Header().Get(echo.HeaderXRequestID)
+	}
+
+	return span, context.WithValue(ctx, constant.RequestIDContextKey, rid)
 }
 
 func SetSpanRequest(span opentracing.Span, req *http.Request) error {
