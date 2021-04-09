@@ -62,7 +62,7 @@ func Load(T interface{}) error {
 				}
 
 			case "bool":
-				field.SetBool(value == "true")
+				field.SetBool(value == "true" || value == "enabled" || value == "enable")
 
 			case "float32", "float64":
 				if f, err := strconv.ParseFloat(value, 64); err == nil {
