@@ -11,6 +11,14 @@ Set tags http.status_code, http.request_id and http.user_id
 
 [example](example/jeager/main.go) with [Echo](https://echo.labstack.com/)
 
+run Jeager all in one
+
+```
+docker run -p 6831:6831/udp -p 16686:16686 jaegertracing/all-in-one:latest
+```
+
+then visit http://localhost:16686/
+
 ## Properties loader
 
 Set struct value from environment
