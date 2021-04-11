@@ -68,8 +68,15 @@ see more: [example](example/jeager/main.go) with [Echo](https://echo.labstack.co
 
 run Jeager all in one
 
-```
+```sh
 docker run -p 6831:6831/udp -p 16686:16686 jaegertracing/all-in-one:latest
+```
+
+then make a request
+
+```
+curl --location --request GET 'http://localhost:1323/' \
+--header 'X-User-ID: 4493'
 ```
 
 then visit http://localhost:16686
