@@ -20,7 +20,7 @@ example:
 export APP_NAME='Apple'
 export APP_NUMBER=1
 export APP_DIGIT=0.99
-export APP_SOME_WORD='Yes, it is from environmet'
+export APP_SOME_WORD='Yes, it is from environment'
 ```
 
 main.go:
@@ -55,7 +55,7 @@ func main() {
 result:
 
 ```sh
-{Apple 1 0.99 Yes, it is from environmet}
+{Apple 1 0.99 Yes, it is from environment}
 ```
 
 Add `required:"true"` to return error if ENV not found
