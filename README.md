@@ -5,29 +5,24 @@
 
 Common code in Golang HTTP Server
 
-## Opentracing middleware
-
-Set tags http.status_code, http.request_id and http.user_id
-
-[example](example/jeager/main.go) with [Echo](https://echo.labstack.com/)
-
-run Jeager all in one
-
-```
-docker run -p 6831:6831/udp -p 16686:16686 jaegertracing/all-in-one:latest
-```
-
-then visit http://localhost:16686/
-
 ## Properties loader
 
 Set struct value from environment
 
 ### Usage
 
-Example:
+example:
 
+```sh
+export APP_NAME='Apple'
+export APP_NUMBER=1
+export APP_DIGIT=0.99
+export APP_SOME_WORD='Yes, it is from environmet'
 ```
+
+main.go:
+
+```golang
 package main
 
 import (
@@ -37,10 +32,10 @@ import (
 )
 
 type Configuration struct {
-	Name        string
-	Number      int     `required:"true"`
-	Digit       float64
-    SomeWord    string
+	Name     string  ``
+	Number   int     `required:"true"`
+	Digit    float64 ``
+	SomeWord string  ``
 }
 
 func main() {
@@ -54,12 +49,27 @@ func main() {
 }
 ```
 
-value of cfg.Name = os.Getenv("APP_NAME")
-value of cfg.SomeWord = os.Getenv("APP_SOME_WORD")
-Add require tag to return error if ENV not found
+result:
 
-```golang
-RequiredValue string `required:"true"`
+```sh
+{Apple 1 0.99 Yes, it is from environmet}
 ```
 
-[example](example/properties/main.go)
+Add `required:"true"` to return error if ENV not found
+
+
+see more: [example](example/properties/main.go)
+
+## Opentracing middleware
+
+Set tags http.status_code, http.request_id and http.user_id
+
+see more: [example](example/jeager/main.go) with [Echo](https://echo.labstack.com/)
+
+run Jeager all in one
+
+```
+docker run -p 6831:6831/udp -p 16686:16686 jaegertracing/all-in-one:latest
+```
+
+then visit http://localhost:16686

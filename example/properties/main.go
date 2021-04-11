@@ -3,15 +3,14 @@ package main
 import (
 	"fmt"
 
-	_ "github.com/joho/godotenv/autoload"
 	"github.com/tongium/common-go/pkg/properties"
 )
 
 type Configuration struct {
-	Name    string  ``
-	Enabled bool    ``
-	Number  int     `required:"true"`
-	Digit   float64 ``
+	Name     string  ``
+	Number   int     `required:"true"`
+	Digit    float64 ``
+	SomeWord string  ``
 }
 
 func main() {
