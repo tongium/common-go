@@ -19,10 +19,24 @@ func ToSnakeCase(str string) string {
 	return strings.ToUpper(snake)
 }
 
-const prefix = "APP_"
+type Config struct {
+	Prefix string
+}
 
 // Support only exported field and type is string, bool, int, or float
 func Load(T interface{}) error {
+	cfg := Config{
+		Prefix: "APP_",
+	}
+
+	return load(cfg, T)
+}
+
+func LoadWithConfig(T interface{}, cfg Config) error {
+	return load(cfg, T)
+}
+
+func load(cfg Config, T interface{}) error {
 	v := reflect.ValueOf(T)
 	if v.Kind() != reflect.Ptr {
 		return errors.New("given argument is not pointer")
@@ -37,7 +51,7 @@ func Load(T interface{}) error {
 		}
 
 		tag := elem.Type().Field(i).Tag
-		name := prefix + ToSnakeCase(elem.Type().Field(i).Name)
+		name := cfg.Prefix + ToSnakeCase(elem.Type().Field(i).Name)
 
 		var required bool
 		if value, ok := tag.Lookup("required"); ok && value == "true" {

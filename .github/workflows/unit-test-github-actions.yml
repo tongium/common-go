@@ -1,5 +1,5 @@
 name: unit-test-github-actions
-on: [push]
+on: [push, pull_request]
 jobs:
   run-go-test:
     runs-on: ubuntu-latest
@@ -9,4 +9,4 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
       - name: Test
-        run: go test -v ./...
+        run: go test ./...

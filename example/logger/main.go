@@ -13,17 +13,17 @@ func main() {
 	logutil.New("info", "console")
 	defer logutil.Logger().Sync()
 
-	err := fmt.Errorf("just test")
+	err := fmt.Errorf("error for test")
 
-	log := logutil.WithContext(context.TODO())
-	log.Info("test", zap.Error(err), zap.Int("data", 1))
+	mainLog := logutil.WithContext(context.TODO())
+	mainLog.Info("papaya", zap.Error(err), zap.Int("number", 99))
 
-	log2 := logutil.WithContext(context.WithValue(context.Background(), constant.RequestIDContextKey, "2"))
-	log2.Info("test")
+	appleLog := logutil.WithContext(context.WithValue(context.Background(), constant.RequestIDContextKey, "apple"))
+	appleLog.Info("apple")
 
-	log3 := logutil.WithContext(context.WithValue(context.Background(), constant.RequestIDContextKey, "3"))
-	log3.Info("test")
+	orangeLog := logutil.WithContext(context.WithValue(context.Background(), constant.RequestIDContextKey, "orange"))
+	orangeLog.Info("orange")
 
-	log2.Info("test again")
-	log.Info("test", zap.Error(err), zap.Int("data", 2))
+	appleLog.Info("test again")
+	mainLog.Info("test", zap.Error(err), zap.String("word", "amen"))
 }
