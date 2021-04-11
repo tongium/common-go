@@ -46,7 +46,7 @@ func getDefaultMiddlewareConfig() *MiddlewareConfig {
 	}
 }
 
-func JaegerMiddleware(cfg *MiddlewareConfig) func(http.Handler) http.Handler {
+func OpentracingMiddlewareWithConfig(cfg *MiddlewareConfig) func(http.Handler) http.Handler {
 	if cfg == nil {
 		cfg = getDefaultMiddlewareConfig()
 	}
@@ -109,4 +109,8 @@ func JaegerMiddleware(cfg *MiddlewareConfig) func(http.Handler) http.Handler {
 
 		return http.HandlerFunc(fn)
 	}
+}
+
+func OpentracingMiddleware() func(http.Handler) http.Handler {
+	return OpentracingMiddlewareWithConfig(getDefaultMiddlewareConfig())
 }
