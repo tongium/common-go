@@ -1,7 +1,10 @@
 # common-go
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![made-with-Go](https://img.shields.io/badge/Made%20with-Go-1f425f.svg)](http://golang.org)
+![Go: Version](https://img.shields.io/github/go-mod/go-version/tongium/common-go)
+![Tag](https://img.shields.io/github/v/tag/tongium/common-go)
 ![Test](https://github.com/tongium/common-go/actions/workflows/test.yml/badge.svg)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 Common code in Golang HTTP Server
 
