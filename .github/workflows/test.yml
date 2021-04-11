@@ -1,4 +1,4 @@
-name: unit-test-github-actions
+name: test
 on: [push, pull_request]
 jobs:
   run-go-test:
