@@ -33,7 +33,7 @@ func main() {
 
 	e := echo.New()
 	e.Use(middleware.Logger())
-	e.Use(middleware.RequestID(), echo.WrapMiddleware(tracing.JaegerMiddleware(cfg)))
+	e.Use(middleware.RequestID(), echo.WrapMiddleware(tracing.OpentracingMiddlewareWithConfig(cfg)))
 
 	httpClient := &http.Client{}
 

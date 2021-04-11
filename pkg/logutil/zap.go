@@ -17,6 +17,7 @@ func Logger() *zap.Logger {
 	return logger
 }
 
+// level=[debug,info,warn,error,panic,fatal] default is error, format=[console,json]
 func New(level, format string) error {
 	if format != JSONFormat && format != TextFormat {
 		return fmt.Errorf("log format must is json or console but got '%s'", format)
