@@ -67,7 +67,14 @@ see more: [example](example/properties/main.go)
 
 Set tags http.status_code, http.request_id and http.user_id
 
-see more: [example](example/jeager/main.go) with [Echo](https://echo.labstack.com/)
+see more: [example](example/jaeger/main.go) 
+
+with [Echo](https://echo.labstack.com/)
+
+```golang
+	e := echo.New()
+	e.Use(middleware.RequestID(), echo.WrapMiddleware(tracing.OpentracingMiddleware()))
+```
 
 run Jeager all in one
 
