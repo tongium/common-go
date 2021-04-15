@@ -17,7 +17,7 @@ func skipper(r *http.Request) bool {
 }
 
 func main() {
-	tracer, closer, err := tracing.GetJaegerTracer("example-service")
+	tracer, closer, err := tracing.JaegerTracer("example-service")
 	if err != nil {
 		panic(err)
 	}
