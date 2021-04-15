@@ -10,6 +10,8 @@ import (
 )
 
 func main() {
+	// export LOG_LEVEL=debug
+	// export LOG_ENCODING=console
 	defer logutil.Logger().Sync() // Flush before exit
 
 	err := fmt.Errorf("error for test")
