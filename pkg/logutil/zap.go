@@ -68,7 +68,7 @@ func New(level, encoding string) error {
 			TimeKey:          "timestamp",
 			LevelKey:         "severity",
 			NameKey:          "logger",
-			CallerKey:        "trace",
+			CallerKey:        "caller",
 			FunctionKey:      zapcore.OmitKey,
 			MessageKey:       "message",
 			StacktraceKey:    "stacktrace",
