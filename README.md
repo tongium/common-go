@@ -72,8 +72,8 @@ see more: [example](example/jaeger/main.go)
 with [Echo](https://echo.labstack.com/)
 
 ```golang
-	e := echo.New()
-	e.Use(middleware.RequestID(), echo.WrapMiddleware(tracing.OpentracingMiddleware()))
+e := echo.New()
+e.Use(middleware.RequestID(), echo.WrapMiddleware(tracing.OpentracingMiddleware()))
 ```
 
 run Jeager all in one
@@ -85,8 +85,8 @@ docker run -p 6831:6831/udp -p 16686:16686 jaegertracing/all-in-one:latest
 then make a request
 
 ```
-curl --location --request GET 'http://localhost:1323/' \
---header 'X-User-ID: 4493'
+curl --location --request GET 'http://localhost:8080/' \
+	--header 'X-User-ID: 1'
 ```
 
 then visit http://localhost:16686
