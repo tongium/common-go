@@ -24,7 +24,8 @@ func DefaultTracer() *Config {
 	}
 }
 
-// Get tracer with default configuration if environment not found
+// Get tracer with default configuration if environment not found.
+// https://github.com/jaegertracing/jaeger-client-go#environment-variables
 func JaegerTracer(serviceName string) (opentracing.Tracer, io.Closer, error) {
 	defaultConfig := config.Configuration{
 		ServiceName: serviceName,
@@ -38,7 +39,6 @@ func JaegerTracer(serviceName string) (opentracing.Tracer, io.Closer, error) {
 	}
 
 	// Override default configuration
-	// https://github.com/jaegertracing/jaeger-client-go#environment-variables
 	config, err := defaultConfig.FromEnv()
 	if err != nil {
 		return nil, nil, err
