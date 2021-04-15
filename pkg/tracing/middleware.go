@@ -4,9 +4,11 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/opentracing/opentracing-go"
 	"github.com/opentracing/opentracing-go/ext"
+	"github.com/opentracing/opentracing-go/log"
 	"github.com/tongium/common-go/pkg/constant"
 )
 
@@ -31,13 +33,15 @@ type MiddlewareConfig struct {
 	RequestIDHeaderKey string
 	UserIDHeaderKey    string
 	Skipper            func(r *http.Request) bool
+	LogHeaderKeys      []string
+	LogCookieKeys      []string
 }
 
 func DefaultSkipper(r *http.Request) bool {
 	return false
 }
 
-func getDefaultMiddlewareConfig() *MiddlewareConfig {
+func DefaultMiddlewareConfig() *MiddlewareConfig {
 	return &MiddlewareConfig{
 		Tracer:             opentracing.GlobalTracer(),
 		RequestIDHeaderKey: constant.DefaultRequstIDHeaderKey,
@@ -46,9 +50,10 @@ func getDefaultMiddlewareConfig() *MiddlewareConfig {
 	}
 }
 
+// Get middleware with config
 func OpentracingMiddlewareWithConfig(cfg *MiddlewareConfig) func(http.Handler) http.Handler {
 	if cfg == nil {
-		cfg = getDefaultMiddlewareConfig()
+		cfg = DefaultMiddlewareConfig()
 	}
 
 	if cfg.Tracer == nil {
@@ -60,40 +65,33 @@ func OpentracingMiddlewareWithConfig(cfg *MiddlewareConfig) func(http.Handler) h
 	}
 
 	return func(next http.Handler) http.Handler {
-		fn := func(w http.ResponseWriter, r *http.Request) {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			if cfg.Skipper(r) {
 				next.ServeHTTP(w, r)
 				return
 			}
 
-			operationName := fmt.Sprintf("%s %s", r.Method, r.RequestURI)
-			spanCtx, err := cfg.Tracer.Extract(opentracing.HTTPHeaders, opentracing.HTTPHeadersCarrier(r.Header))
-			var span opentracing.Span
-			if err != nil {
-				span = cfg.Tracer.StartSpan(operationName)
-			} else {
-				span = cfg.Tracer.StartSpan(operationName, ext.RPCServerOption(spanCtx))
+			span := getSpanByRequest(cfg.Tracer, r)
+			defer span.Finish()
+
+			if len(cfg.LogHeaderKeys) > 0 {
+				addHeaderLog(cfg.LogHeaderKeys, r, span)
 			}
 
-			defer span.Finish()
+			if len(cfg.LogCookieKeys) > 0 {
+				addCookieLog(cfg.LogCookieKeys, r, span)
+			}
 
 			writer := &responseWriter{
 				ResponseWriter: w,
 				span:           span,
 			}
 
-			var rid string
 			ctx := r.Context()
-
 			if cfg.RequestIDHeaderKey != "" {
-				rid = r.Header.Get(cfg.RequestIDHeaderKey)
-				if rid == "" {
-					rid = writer.Header().Get(cfg.RequestIDHeaderKey)
-				}
-
-				if rid != "" {
-					ctx = context.WithValue(r.Context(), constant.RequestIDContextKey, rid)
+				if rid := getRequestID(cfg.RequestIDHeaderKey, r, writer); rid != "" {
 					span.SetTag("http.request_id", rid)
+					ctx = context.WithValue(r.Context(), constant.RequestIDContextKey, rid)
 				}
 			}
 
@@ -105,12 +103,57 @@ func OpentracingMiddlewareWithConfig(cfg *MiddlewareConfig) func(http.Handler) h
 
 			req := r.WithContext(opentracing.ContextWithSpan(ctx, span))
 			next.ServeHTTP(writer, req)
-		}
-
-		return http.HandlerFunc(fn)
+		})
 	}
 }
 
+// Get middleware with default config
 func OpentracingMiddleware() func(http.Handler) http.Handler {
-	return OpentracingMiddlewareWithConfig(getDefaultMiddlewareConfig())
+	return OpentracingMiddlewareWithConfig(DefaultMiddlewareConfig())
+}
+
+func addHeaderLog(keys []string, r *http.Request, span opentracing.Span) {
+	if r == nil || span == nil {
+		return
+	}
+
+	for _, key := range keys {
+		if value := r.Header.Get(key); value != "" {
+			span.LogFields(log.String("header:"+strings.ToLower(key), r.Header.Get(key)))
+		}
+	}
+}
+
+func addCookieLog(keys []string, r *http.Request, span opentracing.Span) {
+	if r == nil || span == nil {
+		return
+	}
+
+	for _, key := range keys {
+		if c, err := r.Cookie(key); err == nil {
+			if value := c.Value; value != "" {
+				span.LogFields(log.String("cookie:"+strings.ToLower(key), value))
+			}
+		}
+	}
+}
+
+func getSpanByRequest(tracer opentracing.Tracer, r *http.Request) opentracing.Span {
+	operationName := fmt.Sprintf("%s %s", r.Method, r.RequestURI)
+
+	spanCtx, err := tracer.Extract(opentracing.HTTPHeaders, opentracing.HTTPHeadersCarrier(r.Header))
+	if err != nil {
+		return tracer.StartSpan(operationName)
+	}
+
+	return tracer.StartSpan(operationName, ext.RPCServerOption(spanCtx))
+}
+
+func getRequestID(key string, r *http.Request, w http.ResponseWriter) string {
+	rid := r.Header.Get(key)
+	if rid == "" {
+		rid = w.Header().Get(key)
+	}
+
+	return rid
 }

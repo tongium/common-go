@@ -17,7 +17,7 @@ type Config struct {
 	RequestIDHeaderKey string
 }
 
-func DefaultTracer() *Config {
+func DefaultTracerConfig() *Config {
 	return &Config{
 		Tracer:             opentracing.GlobalTracer(),
 		RequestIDHeaderKey: constant.DefaultRequstIDHeaderKey,
@@ -48,9 +48,18 @@ func JaegerTracer(serviceName string) (opentracing.Tracer, io.Closer, error) {
 }
 
 // Carries span and request-id to request header
-func SetTracingHeader(ctx context.Context, req *http.Request, span opentracing.Span, cfg *Config) {
+func SetTracingHeader(req *http.Request, ctx context.Context, span opentracing.Span) {
+	if req == nil || ctx == nil || span == nil {
+		return
+	}
+
+	SetTracingHeaderWithConfig(req, ctx, span, DefaultTracerConfig())
+}
+
+// Carries span and request-id to request header with custom configuration
+func SetTracingHeaderWithConfig(req *http.Request, ctx context.Context, span opentracing.Span, cfg *Config) {
 	if cfg == nil {
-		cfg = DefaultTracer()
+		cfg = DefaultTracerConfig()
 	}
 
 	if cfg.Tracer == nil {
@@ -63,7 +72,7 @@ func SetTracingHeader(ctx context.Context, req *http.Request, span opentracing.S
 		}
 	}
 
-	if cfg.Tracer != nil && span != nil {
+	if span != nil {
 		cfg.Tracer.Inject(span.Context(), opentracing.HTTPHeaders, opentracing.HTTPHeadersCarrier(req.Header))
 	}
 }
