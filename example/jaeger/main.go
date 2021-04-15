@@ -17,7 +17,9 @@ func skipper(r *http.Request) bool {
 }
 
 func main() {
-	tracer, closer, err := tracing.GetJaegerTracer("example-service")
+	port := "8080"
+
+	tracer, closer, err := tracing.JaegerTracer("example-service")
 	if err != nil {
 		panic(err)
 	}
@@ -29,6 +31,8 @@ func main() {
 		UserIDHeaderKey:    "X-User-ID",
 		RequestIDHeaderKey: "X-Request-ID",
 		Skipper:            skipper,
+		LogHeaderKeys:      []string{"User-Agent"},
+		LogCookieKeys:      []string{"access_token"},
 	}
 
 	// Get middleware from custom configuration
@@ -56,8 +60,8 @@ func main() {
 
 		wait(ctx)
 
-		httpReq, _ := http.NewRequest("GET", "http://localhost:8080/sleep", nil)
-		tracing.SetTracingHeader(ctx, httpReq, span, nil)
+		httpReq, _ := http.NewRequest("GET", "http://localhost:"+port+"/sleep", nil)
+		tracing.SetTracingHeader(httpReq, ctx, span)
 		_, err := httpClient.Do(httpReq)
 		if err != nil {
 			span.SetBaggageItem("error", err.Error())
@@ -80,8 +84,8 @@ func main() {
 	mux.Handle("/", requestIDMiddleware(opentracingMiddleware(http.HandlerFunc(root))))
 	mux.Handle("/sleep", requestIDMiddleware(opentracingMiddleware(http.HandlerFunc(sleep))))
 
-	log.Println("Listening on :8080...")
-	log.Fatal(http.ListenAndServe(":8080", mux))
+	log.Println("Listening on :" + port)
+	log.Fatal(http.ListenAndServe(":"+port, mux))
 }
 
 func wait(ctx context.Context) {

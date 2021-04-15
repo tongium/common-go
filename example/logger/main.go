@@ -10,8 +10,9 @@ import (
 )
 
 func main() {
-	logutil.New("info", "console")
-	defer logutil.Logger().Sync()
+	// export LOG_LEVEL=debug
+	// export LOG_ENCODING=console
+	defer logutil.Logger().Sync() // Flush before exit
 
 	err := fmt.Errorf("error for test")
 
@@ -19,11 +20,11 @@ func main() {
 	mainLog.Info("papaya", zap.Error(err), zap.Int("number", 99))
 
 	appleLog := logutil.WithContext(context.WithValue(context.Background(), constant.RequestIDContextKey, "apple"))
-	appleLog.Info("apple")
+	appleLog.Debug("apple")
 
 	orangeLog := logutil.WithContext(context.WithValue(context.Background(), constant.RequestIDContextKey, "orange"))
-	orangeLog.Info("orange")
+	orangeLog.Error("orange")
 
 	appleLog.Info("test again")
-	mainLog.Info("test", zap.Error(err), zap.String("word", "amen"))
+	mainLog.Warn("test", zap.Error(err), zap.String("word", "amen"))
 }

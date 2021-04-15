@@ -9,6 +9,7 @@ import (
 	"go.uber.org/zap"
 )
 
+// Add request ID from middleware to logging
 func WithContext(ctx context.Context) *zap.Logger {
 	if ctx == nil {
 		return logger

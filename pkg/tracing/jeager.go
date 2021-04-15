@@ -17,15 +17,17 @@ type Config struct {
 	RequestIDHeaderKey string
 }
 
-func getDefaultTracer() *Config {
+func DefaultTracerConfig() *Config {
 	return &Config{
 		Tracer:             opentracing.GlobalTracer(),
 		RequestIDHeaderKey: constant.DefaultRequstIDHeaderKey,
 	}
 }
 
-func GetJaegerTracer(serviceName string) (opentracing.Tracer, io.Closer, error) {
-	cfg := config.Configuration{
+// Get tracer with default configuration if environment not found.
+// https://github.com/jaegertracing/jaeger-client-go#environment-variables
+func JaegerTracer(serviceName string) (opentracing.Tracer, io.Closer, error) {
+	defaultConfig := config.Configuration{
 		ServiceName: serviceName,
 		Sampler: &config.SamplerConfig{
 			Type:  jaeger.SamplerTypeConst,
@@ -36,17 +38,28 @@ func GetJaegerTracer(serviceName string) (opentracing.Tracer, io.Closer, error) 
 		},
 	}
 
-	return cfg.NewTracer()
-}
+	// Override default configuration
+	config, err := defaultConfig.FromEnv()
+	if err != nil {
+		return nil, nil, err
+	}
 
-func inject(tracer opentracing.Tracer, span opentracing.Span, req *http.Request) error {
-	return tracer.Inject(span.Context(), opentracing.HTTPHeaders, opentracing.HTTPHeadersCarrier(req.Header))
+	return config.NewTracer()
 }
 
 // Carries span and request-id to request header
-func SetTracingHeader(ctx context.Context, req *http.Request, span opentracing.Span, cfg *Config) {
+func SetTracingHeader(req *http.Request, ctx context.Context, span opentracing.Span) {
+	if req == nil || ctx == nil || span == nil {
+		return
+	}
+
+	SetTracingHeaderWithConfig(req, ctx, span, DefaultTracerConfig())
+}
+
+// Carries span and request-id to request header with custom configuration
+func SetTracingHeaderWithConfig(req *http.Request, ctx context.Context, span opentracing.Span, cfg *Config) {
 	if cfg == nil {
-		cfg = getDefaultTracer()
+		cfg = DefaultTracerConfig()
 	}
 
 	if cfg.Tracer == nil {
@@ -59,11 +72,12 @@ func SetTracingHeader(ctx context.Context, req *http.Request, span opentracing.S
 		}
 	}
 
-	if cfg.Tracer != nil && span != nil {
-		inject(cfg.Tracer, span, req)
+	if span != nil {
+		cfg.Tracer.Inject(span.Context(), opentracing.HTTPHeaders, opentracing.HTTPHeadersCarrier(req.Header))
 	}
 }
 
+// Get request id from context which set by middleware
 func GetRequestIDFromContext(ctx context.Context) string {
 	if ctx != nil && ctx.Value(constant.RequestIDContextKey) != nil {
 		return fmt.Sprintf("%v", ctx.Value(constant.RequestIDContextKey))
