@@ -74,6 +74,10 @@ func OpentracingMiddlewareWithConfig(cfg *MiddlewareConfig) func(http.Handler) h
 			span := getSpanByRequest(cfg.Tracer, r)
 			defer span.Finish()
 
+			span.SetTag("http.method", r.Method)
+			span.SetTag("http.url", r.URL)
+			span.SetTag("http.scheme", r.Proto)
+
 			if len(cfg.LogHeaderKeys) > 0 {
 				addHeaderLog(cfg.LogHeaderKeys, r, span)
 			}
