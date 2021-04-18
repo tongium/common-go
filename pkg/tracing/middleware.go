@@ -14,18 +14,12 @@ import (
 
 type responseWriter struct {
 	http.ResponseWriter
-	span        opentracing.Span
-	wroteHeader bool
+	span opentracing.Span
 }
 
 func (rw *responseWriter) WriteHeader(code int) {
-	if rw.wroteHeader {
-		return
-	}
-
-	rw.ResponseWriter.WriteHeader(code)
 	rw.span.SetTag("http.status_code", code)
-	rw.wroteHeader = true
+	rw.ResponseWriter.WriteHeader(code)
 }
 
 type MiddlewareConfig struct {
@@ -73,6 +67,10 @@ func OpentracingMiddlewareWithConfig(cfg *MiddlewareConfig) func(http.Handler) h
 
 			span := getSpanByRequest(cfg.Tracer, r)
 			defer span.Finish()
+
+			span.SetTag("http.method", r.Method)
+			span.SetTag("http.url", r.URL)
+			span.SetTag("http.scheme", r.Proto)
 
 			if len(cfg.LogHeaderKeys) > 0 {
 				addHeaderLog(cfg.LogHeaderKeys, r, span)
