@@ -39,12 +39,12 @@ func JaegerTracer(serviceName string) (opentracing.Tracer, io.Closer, error) {
 	}
 
 	// Override default configuration
-	config, err := defaultConfig.FromEnv()
+	cfg, err := defaultConfig.FromEnv()
 	if err != nil {
 		return nil, nil, err
 	}
 
-	return config.NewTracer()
+	return cfg.NewTracer()
 }
 
 // Carries span and request-id to request header

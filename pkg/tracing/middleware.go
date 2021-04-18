@@ -14,18 +14,12 @@ import (
 
 type responseWriter struct {
 	http.ResponseWriter
-	span        opentracing.Span
-	wroteHeader bool
+	span opentracing.Span
 }
 
 func (rw *responseWriter) WriteHeader(code int) {
-	if rw.wroteHeader {
-		return
-	}
-
-	rw.ResponseWriter.WriteHeader(code)
 	rw.span.SetTag("http.status_code", code)
-	rw.wroteHeader = true
+	rw.ResponseWriter.WriteHeader(code)
 }
 
 type MiddlewareConfig struct {

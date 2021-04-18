@@ -68,8 +68,8 @@ func main() {
 			log.Println(err)
 		}
 
-		fmt.Fprintf(w, "Hello")
 		w.WriteHeader(http.StatusOK)
+		fmt.Fprintf(w, "Hello")
 	}
 
 	sleep := func(w http.ResponseWriter, r *http.Request) {
