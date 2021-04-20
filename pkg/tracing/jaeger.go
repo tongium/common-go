@@ -31,7 +31,7 @@ func JaegerTracer(serviceName string) (opentracing.Tracer, io.Closer, error) {
 		ServiceName: serviceName,
 		Sampler: &config.SamplerConfig{
 			Type:  jaeger.SamplerTypeConst,
-			Param: 1,
+			Param: 1, // Always
 		},
 		Reporter: &config.ReporterConfig{
 			LogSpans: true,
