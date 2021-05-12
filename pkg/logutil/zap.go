@@ -13,7 +13,6 @@ var logger *zap.Logger
 var quiet bool = os.Getenv("LOG_QUIET") == "true"
 
 // Get global logger, create new from environment if not exist.
-//
 // Make sure you call New() before call this or set LOG_LEVEL and LOG_ENCODING.
 func Logger() *zap.Logger {
 	if logger == nil {
@@ -26,7 +25,6 @@ func Logger() *zap.Logger {
 }
 
 // Create global logger from environment
-//
 // LOG_LEVEL (default is error), LOG_ENCODING (default is json)
 func NewFromEnv() error {
 	level, ok := os.LookupEnv("LOG_LEVEL")
@@ -40,9 +38,7 @@ func NewFromEnv() error {
 }
 
 // Create global logger with stackdriver format
-//
 // level: debug, info, warn, error, panic, and fatal (default is error)
-//
 // encoding: json and console (default is json)
 func New(level, encoding string) error {
 	encodeLevel := zapcore.LowercaseLevelEncoder

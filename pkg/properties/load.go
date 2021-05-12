@@ -12,6 +12,7 @@ import (
 
 var matchFirstCap = regexp.MustCompile("(.)([A-Z][a-z]+)")
 var matchAllCap = regexp.MustCompile("([a-z0-9])([A-Z])")
+var nameMatch = regexp.MustCompile("name:([A-Za-z0-9_]+)")
 
 func ToSnakeCase(str string) string {
 	snake := matchFirstCap.ReplaceAllString(str, "${1}_${2}")
@@ -54,8 +55,15 @@ func load(cfg Config, T interface{}) error {
 		name := cfg.Prefix + ToSnakeCase(elem.Type().Field(i).Name)
 
 		var required bool
-		if value, ok := tag.Lookup("required"); ok && value == "true" {
-			required = true
+		if value, ok := tag.Lookup("prop"); ok {
+			if strings.Contains(value, "require") {
+				required = true
+			}
+
+			if n := nameMatch.FindString(value); n != "" {
+				ss := strings.Split(n, ":")
+				name = ss[len(ss)-1]
+			}
 		}
 
 		value, ok := os.LookupEnv(name)
